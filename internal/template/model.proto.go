@@ -109,7 +109,6 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.ModelStructName}}ListReq) (reply *pb.{{.ModelStructName}}ListRsp, err error) {
@@ -127,9 +126,8 @@ func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.Model
 
 func (s *Service) {{.ModelStructName}}Add(ctx context.Context, req *pb.{{.ModelStructName}}Req) (reply *pb.{{.ModelStructName}}Rsp, err error) {
 	m := model.{{.ModelStructName}}{}
-	m.ToModel(req.{{.ModelStructName}}).ID = bson.NewObjectId().Hex()
 
-	if err = query.{{.ModelStructName}}.Create(); err != nil {
+	if err = query.{{.ModelStructName}}.Create(m.ToModel(req.{{.ModelStructName}})); err != nil {
 		return nil, err
 	}
 
