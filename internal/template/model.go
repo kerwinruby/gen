@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"time"
 
+	xtime "gitlab.datahunter.cn/common/kratos/pkg/time"
+
 	pb "{{.ProjectName}}/api"
 	"github.com/jinzhu/copier"
 
@@ -30,6 +32,18 @@ type {{.ModelStructName}} struct {
     {{.Name}} {{.Type}} ` + "`{{.Tags}}` " +
 	"{{if not .MultilineComment}}{{if .ColumnComment}}// {{.ColumnComment}}{{end}}{{end}}" +
 	`{{end}}
+}
+
+func (m *{{.ModelStructName}}) BeforeCreate() {
+	m.CreatedTime = xtime.Millisecond()
+}
+
+func (m *{{.ModelStructName}}) BeforeUpdate() {
+	m.UpdatedTime = xtime.Millisecond()
+}
+
+func (m *{{.ModelStructName}}) BeforeDelete() {
+	m.DeletedTime = xtime.Millisecond()
 }
 
 func (m *{{.ModelStructName}}) ToPb() *pb.{{.ModelStructName}} {
