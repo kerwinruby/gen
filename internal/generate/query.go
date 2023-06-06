@@ -26,6 +26,7 @@ func (dummyFieldParser) GetFieldGenType(*schema.Field) string { return "" }
 type QueryStructMeta struct {
 	db *gorm.DB
 
+	ProjectName     string
 	Generated       bool   // whether to generate db model
 	FileName        string // generated file name
 	S               string // the first letter(lower case)of simple Name (receiver)

@@ -173,6 +173,7 @@ type Field struct {
 	GORMTag          field.GormTag
 	CustomGenType    string
 	Relation         *field.Relation
+	ProtoTag         field.ProtoTag
 }
 
 // Tags ...
@@ -251,4 +252,9 @@ func (s *SQLBuffer) WriteSQL(b byte) {
 func (s *SQLBuffer) Dump() string {
 	defer s.Reset()
 	return s.String()
+}
+
+// ProtoTags ...
+func (m *Field) ProtoTags() string {
+	return m.ProtoTag.Build()
 }

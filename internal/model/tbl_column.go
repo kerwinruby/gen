@@ -12,11 +12,12 @@ import (
 // Column table column's info
 type Column struct {
 	gorm.ColumnType
-	TableName   string                                                        `gorm:"column:TABLE_NAME"`
-	Indexes     []*Index                                                      `gorm:"-"`
-	UseScanType bool                                                          `gorm:"-"`
-	dataTypeMap map[string]func(columnType gorm.ColumnType) (dataType string) `gorm:"-"`
-	jsonTagNS   func(columnName string) string                                `gorm:"-"`
+	TableName      string                                                        `gorm:"column:TABLE_NAME"`
+	Indexes        []*Index                                                      `gorm:"-"`
+	UseScanType    bool                                                          `gorm:"-"`
+	dataTypeMap    map[string]func(columnType gorm.ColumnType) (dataType string) `gorm:"-"`
+	jsonTagNS      func(columnName string) string                                `gorm:"-"`
+	protoFormTagNS func(columnName string) string                                `gorm:"-"`
 }
 
 // SetDataTypeMap set data type map
@@ -41,6 +42,7 @@ func (c *Column) WithNS(jsonTagNS func(columnName string) string) {
 	if c.jsonTagNS == nil {
 		c.jsonTagNS = func(n string) string { return n }
 	}
+	c.protoFormTagNS = func(n string) string { return fmt.Sprintf("form:\"%s\"", n) }
 }
 
 // ToField convert to field
@@ -73,6 +75,7 @@ func (c *Column) ToField(nullable, coverable, signable bool) *Field {
 		GORMTag:          c.buildGormTag(),
 		Tag:              map[string]string{field.TagKeyJson: c.jsonTagNS(c.Name())},
 		ColumnComment:    comment,
+		ProtoTag:         map[string]string{field.TagKeyProtoForm: c.protoFormTagNS(c.Name()), field.TagKeyProtoJson: c.jsonTagNS(c.Name())},
 	}
 }
 

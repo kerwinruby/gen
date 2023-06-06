@@ -6,8 +6,10 @@ import (
 )
 
 const (
-	TagKeyGorm = "gorm"
-	TagKeyJson = "json"
+	TagKeyGorm      = "gorm"
+	TagKeyJson      = "json"
+	TagKeyProtoForm = "(gogoproto.moretags)"
+	TagKeyProtoJson = "(gogoproto.jsontag)"
 
 	//gorm tag
 	TagKeyGormColumn        = "column"
@@ -23,8 +25,10 @@ const (
 
 var (
 	tagKeyPriorities = map[string]int16{
-		TagKeyGorm: 100,
-		TagKeyJson: 99,
+		TagKeyProtoForm: 200,
+		TagKeyProtoJson: 199,
+		TagKeyGorm:      100,
+		TagKeyJson:      99,
 
 		TagKeyGormColumn:        10,
 		TagKeyGormType:          9,
@@ -156,4 +160,43 @@ func keySort(keys []string) []string {
 		return tagKeyPriorities[keys[i]] > tagKeyPriorities[keys[j]]
 	})
 	return keys
+}
+
+type ProtoTag map[string]string
+
+func (tag ProtoTag) Set(key, value string) ProtoTag {
+	tag[key] = value
+	return tag
+}
+
+func (tag ProtoTag) Remove(key string) ProtoTag {
+	delete(tag, key)
+	return tag
+}
+
+func (tag ProtoTag) Build() string {
+	if tag == nil || len(tag) == 0 {
+		return ""
+	}
+
+	tags := make([]string, 0, len(tag))
+	for _, k := range protoTagKeys(tag) {
+		v := tag[k]
+		if k == "" || v == "" {
+			continue
+		}
+		tags = append(tags, k+"='"+v+"'")
+	}
+	return strings.Join(tags, ",")
+}
+
+func protoTagKeys(tag ProtoTag) []string {
+	keys := make([]string, 0, len(tag))
+	if len(tag) == 0 {
+		return keys
+	}
+	for k, _ := range tag {
+		keys = append(keys, k)
+	}
+	return keySort(keys)
 }

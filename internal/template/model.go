@@ -8,6 +8,9 @@ import (
 	"encoding/json"
 	"time"
 
+	pb "{{.ProjectName}}/api"
+	"github.com/jinzhu/copier"
+
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -29,6 +32,26 @@ type {{.ModelStructName}} struct {
 	`{{end}}
 }
 
+func (m *{{.ModelStructName}}) ToPb() *pb.{{.ModelStructName}} {
+	to := &pb.{{.ModelStructName}}{}
+	copier.Copy(to, m)
+	return to
+}
+
+func (m *{{.ModelStructName}}) ToModel(u *pb.{{.ModelStructName}}) *{{.ModelStructName}} {
+	copier.Copy(m, u)
+	return m
+}
+
+type {{.ModelStructName}}s []*{{.ModelStructName}}
+
+func (ms {{.ModelStructName}}s) ToPb() []*pb.{{.ModelStructName}} {
+	list := make([]*pb.{{.ModelStructName}}, len(ms))
+	for i, m := range ms {
+		list[i] = m.ToPb()
+	}
+	return list
+}
 `
 
 // ModelMethod model struct DIY method

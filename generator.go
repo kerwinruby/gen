@@ -134,10 +134,18 @@ func (g *Generator) GenerateAllTable(opts ...ModelOpt) (tableModels []interface{
 		panic(fmt.Errorf("get all tables fail: %w", err))
 	}
 
+	excludeModelMap := make(map[string]bool)
+	for _, excludeModel := range g.ExcludeModels {
+		excludeModelMap[excludeModel] = true
+	}
+
 	g.info(fmt.Sprintf("find %d table from db: %s", len(tableList), tableList))
 
 	tableModels = make([]interface{}, len(tableList))
 	for i, tableName := range tableList {
+		if _, ok := excludeModelMap[tableName]; ok {
+			continue
+		}
 		tableModels[i] = g.GenerateModel(tableName, opts...)
 	}
 	return tableModels
@@ -255,6 +263,7 @@ func (g *Generator) apply(fc interface{}, structs []*generate.QueryStructMeta) {
 			panic("check interface fail")
 		}
 		genInfo.appendMethods(functions)
+		genInfo.ProjectName = g.ProjectName
 	}
 }
 
@@ -270,6 +279,16 @@ func (g *Generator) Execute() {
 	if err := g.generateQueryFile(); err != nil {
 		g.db.Logger.Error(context.Background(), "generate query code fail: %s", err)
 		panic("generate query code fail")
+	}
+
+	if err := g.generateModelProtoFile(); err != nil {
+		g.db.Logger.Error(context.Background(), "generate model proto struct fail: %s", err)
+		panic("generate model proto struct fail")
+	}
+
+	if err := g.generateModelServiceFile(); err != nil {
+		g.db.Logger.Error(context.Background(), "generate model proto struct fail: %s", err)
+		panic("generate model proto struct fail")
 	}
 
 	g.info("Generate code done.")
@@ -583,7 +602,7 @@ func (g *Generator) pushQueryStructMeta(meta *generate.QueryStructMeta) (*genInf
 }
 
 func render(tmpl string, wr io.Writer, data interface{}) error {
-	t, err := template.New(tmpl).Parse(tmpl)
+	t, err := template.New(tmpl).Funcs(template.FuncMap{"Add": Add}).Parse(tmpl)
 	if err != nil {
 		return err
 	}
