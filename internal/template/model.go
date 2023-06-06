@@ -16,6 +16,7 @@ import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"gopkg.in/mgo.v2/bson"
 	{{range .ImportPkgPaths}}{{.}} ` + "\n" + `{{end}}
 )
 
@@ -35,15 +36,24 @@ type {{.ModelStructName}} struct {
 }
 
 func (m *{{.ModelStructName}}) BeforeCreate() {
+	{{if ExistsField "ID" .Fields}}
+	m.ID = bson.NewObjectId().Hex()
+	{{end}}	
+	{{if ExistsField "CreatedTime" .Fields}}
 	m.CreatedTime = xtime.Millisecond()
+	{{end}}
 }
 
 func (m *{{.ModelStructName}}) BeforeUpdate() {
+	{{if ExistsField "UpdatedTime" .Fields}}
 	m.UpdatedTime = xtime.Millisecond()
+	{{end}}
 }
 
 func (m *{{.ModelStructName}}) BeforeDelete() {
+	{{if ExistsField "DeletedTime" .Fields}}
 	m.DeletedTime = xtime.Millisecond()
+	{{end}}
 }
 
 func (m *{{.ModelStructName}}) ToPb() *pb.{{.ModelStructName}} {
