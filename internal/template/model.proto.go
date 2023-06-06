@@ -109,6 +109,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/emptypb"
+	xtime "gitlab.datahunter.cn/common/kratos/pkg/time"
 )
 
 func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.ModelStructName}}ListReq) (reply *pb.{{.ModelStructName}}ListRsp, err error) {
@@ -127,7 +128,7 @@ func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.Model
 func (s *Service) {{.ModelStructName}}Add(ctx context.Context, req *pb.{{.ModelStructName}}Req) (reply *pb.{{.ModelStructName}}Rsp, err error) {
 	m := model.{{.ModelStructName}}{}
 
-	if err = query.{{.ModelStructName}}.Create(m.ToModel(req.{{.ModelStructName}})); err != nil {
+	if err = query.{{.ModelStructName}}.Create(m.ToModel(req.{{.ModelStructName}}).BeforeCreate(ctx)); err != nil {
 		return nil, err
 	}
 
@@ -142,7 +143,7 @@ func (s *Service) {{.ModelStructName}}Update(ctx context.Context, req *pb.{{.Mod
 		return nil, errors.New("id is required")
 	}
 	m := model.{{.ModelStructName}}{}
-	if err = query.{{.ModelStructName}}.Save(m.ToModel(req.{{.ModelStructName}})); err != nil {
+	if err = query.{{.ModelStructName}}.Save(m.ToModel(req.{{.ModelStructName}}).BeforeUpdate(ctx)); err != nil {
 		return nil, err
 	}
 
@@ -153,9 +154,17 @@ func (s *Service) {{.ModelStructName}}Update(ctx context.Context, req *pb.{{.Mod
 }
 
 func (s *Service) {{.ModelStructName}}Del(ctx context.Context, req *pb.{{.ModelStructName}}DelReq) (reply *empty.Empty, err error) {
+	{{if ExistsField "DeletedTime" .Fields}}
+	if _, err = query.User.Where(query.User.ID.In(req.Id...)).UpdateColumns(map[string]interface{}{
+		"deleted_time": xtime.Millisecond(),
+	}); err != nil {
+		return nil, err
+	}
+	{{else}}
 	if _, err = query.{{.ModelStructName}}.Where(query.{{.ModelStructName}}.ID.In(req.Id...)).Delete(); err != nil {
 		return nil, err
 	}
+	{{end}}
 	return &emptypb.Empty{}, nil
 }
 

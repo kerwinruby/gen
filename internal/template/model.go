@@ -5,6 +5,7 @@ const Model = NotEditMark + `
 package {{.StructInfo.Package}}
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
@@ -35,25 +36,28 @@ type {{.ModelStructName}} struct {
 	`{{end}}
 }
 
-func (m *{{.ModelStructName}}) BeforeCreate() {
+func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "ID" .Fields}}
 	m.ID = bson.NewObjectId().Hex()
 	{{end}}	
 	{{if ExistsField "CreatedTime" .Fields}}
 	m.CreatedTime = xtime.Millisecond()
 	{{end}}
+	return m
 }
 
-func (m *{{.ModelStructName}}) BeforeUpdate() {
+func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "UpdatedTime" .Fields}}
 	m.UpdatedTime = xtime.Millisecond()
 	{{end}}
+	return m
 }
 
-func (m *{{.ModelStructName}}) BeforeDelete() {
+func (m *{{.ModelStructName}}) BeforeDelete(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "DeletedTime" .Fields}}
 	m.DeletedTime = xtime.Millisecond()
 	{{end}}
+	return m
 }
 
 func (m *{{.ModelStructName}}) ToPb() *pb.{{.ModelStructName}} {
