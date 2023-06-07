@@ -38,7 +38,7 @@ type {{.ModelStructName}} struct {
 	`{{end}}
 }
 
-func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStructName}} {
+func (m *{{.ModelStructName}}) BeforeCreate_(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "ID" .Fields}}
 	m.ID = bson.NewObjectId().Hex()
 	{{end}}	
@@ -62,7 +62,7 @@ func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStruct
 	return m
 }
 
-func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStructName}} {
+func (m *{{.ModelStructName}}) BeforeUpdate_(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "UpdatedTime" .Fields}}
 	m.UpdatedTime = xtime.Millisecond()
 	{{if or (ExistsField "UpdatedID" .Fields) (ExistsField "UpdatedName" .Fields)}}
@@ -83,7 +83,7 @@ func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStruct
 	return m
 }
 
-func (m *{{.ModelStructName}}) BeforeDelete(ctx context.Context) *{{.ModelStructName}} {
+func (m *{{.ModelStructName}}) BeforeDelete_(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "DeletedTime" .Fields}}
 	m.DeletedTime = xtime.Millisecond()
 	{{if or (ExistsField "DeletedID" .Fields) (ExistsField "DeletedName" .Fields)}}

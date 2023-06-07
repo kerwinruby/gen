@@ -44,7 +44,7 @@ func (c *Column) WithNS(jsonTagNS func(columnName string) string) {
 		c.jsonTagNS = func(n string) string { return n }
 	}
 	c.protoFormTagNS = func(n string) string { return fmt.Sprintf("form:\"%s\"", n) }
-	c.protoJsonTagNS = func(n string) string { return fmt.Sprintf("\"%s,omitempty\"", n) }
+	c.protoJsonTagNS = func(n string) string { return fmt.Sprintf("%s,omitempty", n) }
 }
 
 // ToField convert to field

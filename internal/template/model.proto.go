@@ -141,7 +141,7 @@ func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.Model
 func (s *Service) {{.ModelStructName}}Add(ctx context.Context, req *pb.{{.ModelStructName}}Req) (reply *pb.{{.ModelStructName}}Rsp, err error) {
 	m := model.{{.ModelStructName}}{}
 
-	if err = query.{{.ModelStructName}}.WithContext(ctx).Create(m.ToModel(req.{{.ModelStructName}}).BeforeCreate(ctx)); err != nil {
+	if err = query.{{.ModelStructName}}.WithContext(ctx).Create(m.ToModel(req.{{.ModelStructName}}).BeforeCreate_(ctx)); err != nil {
 		return nil, err
 	}
 
@@ -156,7 +156,7 @@ func (s *Service) {{.ModelStructName}}Update(ctx context.Context, req *pb.{{.Mod
 		return nil, errors.New("id is required")
 	}
 	m := model.{{.ModelStructName}}{}
-	if err = query.{{.ModelStructName}}.WithContext(ctx).Save(m.ToModel(req.{{.ModelStructName}}).BeforeUpdate(ctx)); err != nil {
+	if err = query.{{.ModelStructName}}.WithContext(ctx).Save(m.ToModel(req.{{.ModelStructName}}).BeforeUpdate_(ctx)); err != nil {
 		return nil, err
 	}
 
