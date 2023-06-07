@@ -184,7 +184,7 @@ func (s *Service) {{.ModelStructName}}Del(ctx context.Context, req *pb.{{.ModelS
 			{{end}}
 		}
 	}	
-	if _, err = query.User.WithContext(ctx).Where(query.User.ID.In(req.Id...)).UpdateColumns(columns); err != nil {
+	if _, err = query.{{.ModelStructName}}.WithContext(ctx).Where(query.{{.ModelStructName}}.ID.In(req.Id...)).UpdateColumns(columns); err != nil {
 		return nil, err
 	}
 	{{else}}
