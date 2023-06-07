@@ -10,6 +10,8 @@ import (
 	"time"
 
 	xtime "gitlab.datahunter.cn/common/kratos/pkg/time"
+	bm "gitlab.datahunter.cn/common/kratos/pkg/net/http/blademaster"
+	"gitlab.datahunter.cn/common/kratos/pkg/net/metadata"
 
 	pb "{{.ProjectName}}/api"
 	"github.com/jinzhu/copier"
@@ -42,6 +44,18 @@ func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStruct
 	{{end}}	
 	{{if ExistsField "CreatedTime" .Fields}}
 	m.CreatedTime = xtime.Millisecond()
+	if c, ok := ctx.(*bm.Context); ok {
+		{{if ExistsField "CreatedID" .Fields}}
+		if id, ok := c.Keys[metadata.UserID]; ok {
+			m.CreatedID = id.(string)	
+		}
+		{{end}}
+		{{if ExistsField "CreatedName" .Fields}}
+		if name, ok := c.Keys[metadata.UserName]; ok {
+			m.CreatedName = name.(string)
+		}
+		{{end}}
+	}	
 	{{end}}
 	return m
 }
@@ -49,6 +63,18 @@ func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStruct
 func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "UpdatedTime" .Fields}}
 	m.UpdatedTime = xtime.Millisecond()
+	if c, ok := ctx.(*bm.Context); ok {
+		{{if ExistsField "UpdatedID" .Fields}}
+		if id, ok := c.Keys[metadata.UserID]; ok {
+			m.UpdatedID = id.(string)	
+		}
+		{{end}}
+		{{if ExistsField "UpdatedName" .Fields}}
+		if name, ok := c.Keys[metadata.UserName]; ok {
+			m.UpdatedName = name.(string)
+		}
+		{{end}}
+	}		
 	{{end}}
 	return m
 }
@@ -56,6 +82,18 @@ func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStruct
 func (m *{{.ModelStructName}}) BeforeDelete(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "DeletedTime" .Fields}}
 	m.DeletedTime = xtime.Millisecond()
+	if c, ok := ctx.(*bm.Context); ok {
+		{{if ExistsField "DeletedID" .Fields}}
+		if id, ok := c.Keys[metadata.UserID]; ok {
+			m.DeletedID = id.(string)	
+		}
+		{{end}}
+		{{if ExistsField "DeletedName" .Fields}}
+		if name, ok := c.Keys[metadata.UserName]; ok {
+			m.DeletedName = name.(string)
+		}
+		{{end}}
+	}		
 	{{end}}
 	return m
 }
