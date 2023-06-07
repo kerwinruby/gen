@@ -110,15 +110,24 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/emptypb"
 	xtime "gitlab.datahunter.cn/common/kratos/pkg/time"
+	bm "gitlab.datahunter.cn/common/kratos/pkg/net/http/blademaster"
+	"gitlab.datahunter.cn/common/kratos/pkg/net/metadata"
+)
+
+//用于引入包
+var (
+	_ bm.CORSConfig
+	_ xtime.Duration
+	_ metadata.MD
 )
 
 func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.ModelStructName}}ListReq) (reply *pb.{{.ModelStructName}}ListRsp, err error) {
 	page := &Page{req.Page}
-	qdo := query.DirConnect.WithContext(ctx)
+	qdo := query.{{.ModelStructName}}.WithContext(ctx)
 	{{if ExistsField "DeletedTime" .Fields}}
-	qdo = qdo.Where(query.DirConnect.DeletedTime.Eq(0))
+	qdo = qdo.Where(query.{{.ModelStructName}}.DeletedTime.Eq(0))
 	{{end}}	
-	list, total, err := query.{{.ModelStructName}}.WithContext(ctx).FindByPage(page.Offset(), page.Limit())
+	list, total, err := qdo.FindByPage(page.Offset(), page.Limit())
 	if err != nil {
 		return nil, err
 	}

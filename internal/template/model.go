@@ -44,6 +44,7 @@ func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStruct
 	{{end}}	
 	{{if ExistsField "CreatedTime" .Fields}}
 	m.CreatedTime = xtime.Millisecond()
+	{{if or (ExistsField "CreatedID" .Fields) (ExistsField "CreatedName" .Fields)}}
 	if c, ok := ctx.(*bm.Context); ok {
 		{{if ExistsField "CreatedID" .Fields}}
 		if id, ok := c.Keys[metadata.UserID]; ok {
@@ -55,7 +56,8 @@ func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStruct
 			m.CreatedName = name.(string)
 		}
 		{{end}}
-	}	
+	}
+	{{end}}
 	{{end}}
 	return m
 }
@@ -63,6 +65,7 @@ func (m *{{.ModelStructName}}) BeforeCreate(ctx context.Context) *{{.ModelStruct
 func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "UpdatedTime" .Fields}}
 	m.UpdatedTime = xtime.Millisecond()
+	{{if or (ExistsField "UpdatedID" .Fields) (ExistsField "UpdatedName" .Fields)}}
 	if c, ok := ctx.(*bm.Context); ok {
 		{{if ExistsField "UpdatedID" .Fields}}
 		if id, ok := c.Keys[metadata.UserID]; ok {
@@ -74,7 +77,8 @@ func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStruct
 			m.UpdatedName = name.(string)
 		}
 		{{end}}
-	}		
+	}
+	{{end}}		
 	{{end}}
 	return m
 }
@@ -82,6 +86,7 @@ func (m *{{.ModelStructName}}) BeforeUpdate(ctx context.Context) *{{.ModelStruct
 func (m *{{.ModelStructName}}) BeforeDelete(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "DeletedTime" .Fields}}
 	m.DeletedTime = xtime.Millisecond()
+	{{if or (ExistsField "DeletedID" .Fields) (ExistsField "DeletedName" .Fields)}}
 	if c, ok := ctx.(*bm.Context); ok {
 		{{if ExistsField "DeletedID" .Fields}}
 		if id, ok := c.Keys[metadata.UserID]; ok {
@@ -93,7 +98,8 @@ func (m *{{.ModelStructName}}) BeforeDelete(ctx context.Context) *{{.ModelStruct
 			m.DeletedName = name.(string)
 		}
 		{{end}}
-	}		
+	}
+	{{end}}
 	{{end}}
 	return m
 }
