@@ -18,6 +18,7 @@ type Column struct {
 	dataTypeMap    map[string]func(columnType gorm.ColumnType) (dataType string) `gorm:"-"`
 	jsonTagNS      func(columnName string) string                                `gorm:"-"`
 	protoFormTagNS func(columnName string) string                                `gorm:"-"`
+	protoJsonTagNS func(columnName string) string                                `gorm:"-"`
 }
 
 // SetDataTypeMap set data type map
@@ -43,6 +44,7 @@ func (c *Column) WithNS(jsonTagNS func(columnName string) string) {
 		c.jsonTagNS = func(n string) string { return n }
 	}
 	c.protoFormTagNS = func(n string) string { return fmt.Sprintf("form:\"%s\"", n) }
+	c.protoJsonTagNS = func(n string) string { return fmt.Sprintf("\"%s,omitempty\"", n) }
 }
 
 // ToField convert to field
@@ -75,7 +77,7 @@ func (c *Column) ToField(nullable, coverable, signable bool) *Field {
 		GORMTag:          c.buildGormTag(),
 		Tag:              map[string]string{field.TagKeyJson: c.jsonTagNS(c.Name())},
 		ColumnComment:    comment,
-		ProtoTag:         map[string]string{field.TagKeyProtoForm: c.protoFormTagNS(c.Name()), field.TagKeyProtoJson: c.jsonTagNS(c.Name())},
+		ProtoTag:         map[string]string{field.TagKeyProtoForm: c.protoFormTagNS(c.Name()), field.TagKeyProtoJson: c.protoJsonTagNS(c.Name())},
 	}
 }
 
