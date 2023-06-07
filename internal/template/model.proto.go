@@ -128,7 +128,7 @@ func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.Model
 func (s *Service) {{.ModelStructName}}Add(ctx context.Context, req *pb.{{.ModelStructName}}Req) (reply *pb.{{.ModelStructName}}Rsp, err error) {
 	m := model.{{.ModelStructName}}{}
 
-	if err = query.{{.ModelStructName}}.Create(m.ToModel(req.{{.ModelStructName}}).BeforeCreate(ctx)); err != nil {
+	if err = query.{{.ModelStructName}}.WithContext(ctx).Create(m.ToModel(req.{{.ModelStructName}}).BeforeCreate(ctx)); err != nil {
 		return nil, err
 	}
 
@@ -143,7 +143,7 @@ func (s *Service) {{.ModelStructName}}Update(ctx context.Context, req *pb.{{.Mod
 		return nil, errors.New("id is required")
 	}
 	m := model.{{.ModelStructName}}{}
-	if err = query.{{.ModelStructName}}.Save(m.ToModel(req.{{.ModelStructName}}).BeforeUpdate(ctx)); err != nil {
+	if err = query.{{.ModelStructName}}.WithContext(ctx).Save(m.ToModel(req.{{.ModelStructName}}).BeforeUpdate(ctx)); err != nil {
 		return nil, err
 	}
 
@@ -155,9 +155,23 @@ func (s *Service) {{.ModelStructName}}Update(ctx context.Context, req *pb.{{.Mod
 
 func (s *Service) {{.ModelStructName}}Del(ctx context.Context, req *pb.{{.ModelStructName}}DelReq) (reply *empty.Empty, err error) {
 	{{if ExistsField "DeletedTime" .Fields}}
-	if _, err = query.User.Where(query.User.ID.In(req.Id...)).UpdateColumns(map[string]interface{}{
+	columns := map[string]interface{}{
 		"deleted_time": xtime.Millisecond(),
-	}); err != nil {
+	}
+
+	if c, ok := ctx.(*bm.Context); ok {
+		if id, ok := c.Keys[metadata.UserID]; ok {
+			{{if ExistsField "DeletedID" .Fields}}
+			columns["deleted_id"] = id
+			{{end}}
+		}
+		if name, ok := c.Keys[metadata.UserName]; ok {
+			{{if ExistsField "DeletedName" .Fields}}
+			columns["deleted_name"] = name
+			{{end}}
+		}
+	}	
+	if _, err = query.User.WithContext(ctx).Where(query.User.ID.In(req.Id...)).UpdateColumns(columns); err != nil {
 		return nil, err
 	}
 	{{else}}
