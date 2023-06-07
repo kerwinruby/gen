@@ -114,6 +114,10 @@ import (
 
 func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.ModelStructName}}ListReq) (reply *pb.{{.ModelStructName}}ListRsp, err error) {
 	page := &Page{req.Page}
+	qdo := query.DirConnect.WithContext(ctx)
+	{{if ExistsField "DeletedTime" .Fields}}
+	qdo = qdo.Where(query.DirConnect.DeletedTime.Eq(0))
+	{{end}}	
 	list, total, err := query.{{.ModelStructName}}.WithContext(ctx).FindByPage(page.Offset(), page.Limit())
 	if err != nil {
 		return nil, err
