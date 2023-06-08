@@ -44,20 +44,12 @@ func (m *{{.ModelStructName}}) BeforeCreate_(ctx context.Context) *{{.ModelStruc
 	{{end}}	
 	{{if ExistsField "CreatedTime" .Fields}}
 	m.CreatedTime = xtime.Millisecond()
-	{{if or (ExistsField "CreatedID" .Fields) (ExistsField "CreatedName" .Fields)}}
-	if c, ok := ctx.(*bm.Context); ok {
-		{{if ExistsField "CreatedID" .Fields}}
-		if id, ok := c.Keys[metadata.UserID]; ok {
-			m.CreatedID = id.(string)	
-		}
-		{{end}}
-		{{if ExistsField "CreatedName" .Fields}}
-		if name, ok := c.Keys[metadata.UserName]; ok {
-			m.CreatedName = name.(string)
-		}
-		{{end}}
-	}
+	{{end}}	
+	{{if ExistsField "CreatedID" .Fields}}
+	m.CreatedID = metadata.String(ctx, metadata.UserID)
 	{{end}}
+	{{if ExistsField "CreatedName" .Fields}}
+	m.CreatedName = metadata.String(ctx, metadata.UserName)
 	{{end}}
 	return m
 }
@@ -65,41 +57,29 @@ func (m *{{.ModelStructName}}) BeforeCreate_(ctx context.Context) *{{.ModelStruc
 func (m *{{.ModelStructName}}) BeforeUpdate_(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "UpdatedTime" .Fields}}
 	m.UpdatedTime = xtime.Millisecond()
-	{{if or (ExistsField "UpdatedID" .Fields) (ExistsField "UpdatedName" .Fields)}}
-	if c, ok := ctx.(*bm.Context); ok {
-		{{if ExistsField "UpdatedID" .Fields}}
-		if id, ok := c.Keys[metadata.UserID]; ok {
-			m.UpdatedID = id.(string)	
-		}
-		{{end}}
-		{{if ExistsField "UpdatedName" .Fields}}
-		if name, ok := c.Keys[metadata.UserName]; ok {
-			m.UpdatedName = name.(string)
-		}
-		{{end}}
-	}
-	{{end}}		
+	{{end}}
+	{{if ExistsField "UpdatedID" .Fields}}
+	m.UpdatedID = metadata.String(ctx, metadata.UserID)
+	{{end}}
+	{{if ExistsField "UpdatedName" .Fields}}
+	m.UpdatedName = metadata.String(ctx, metadata.UserName)
 	{{end}}
 	return m
 }
 
 func (m *{{.ModelStructName}}) BeforeDelete_(ctx context.Context) *{{.ModelStructName}} {
 	{{if ExistsField "DeletedTime" .Fields}}
+	{{if .FieldSoftDelete}}
+	m.DeletedTime = field_type.DeletedTime(xtime.Millisecond())
+	{{else}}
 	m.DeletedTime = xtime.Millisecond()
-	{{if or (ExistsField "DeletedID" .Fields) (ExistsField "DeletedName" .Fields)}}
-	if c, ok := ctx.(*bm.Context); ok {
-		{{if ExistsField "DeletedID" .Fields}}
-		if id, ok := c.Keys[metadata.UserID]; ok {
-			m.DeletedID = id.(string)	
-		}
-		{{end}}
-		{{if ExistsField "DeletedName" .Fields}}
-		if name, ok := c.Keys[metadata.UserName]; ok {
-			m.DeletedName = name.(string)
-		}
-		{{end}}
-	}
 	{{end}}
+	{{end}}
+	{{if ExistsField "DeletedID" .Fields}}
+	m.DeletedID = metadata.String(ctx, metadata.UserID)
+	{{end}}
+	{{if ExistsField "DeletedName" .Fields}}
+	m.DeletedName = metadata.String(ctx, metadata.UserName)
 	{{end}}
 	return m
 }

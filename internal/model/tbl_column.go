@@ -48,12 +48,14 @@ func (c *Column) WithNS(jsonTagNS func(columnName string) string) {
 }
 
 // ToField convert to field
-func (c *Column) ToField(nullable, coverable, signable bool) *Field {
+func (c *Column) ToField(nullable, coverable, signable, softDelete bool) *Field {
 	fieldType := c.GetDataType()
 	if signable && strings.Contains(c.columnType(), "unsigned") && strings.HasPrefix(fieldType, "int") {
 		fieldType = "u" + fieldType
 	}
 	switch {
+	case softDelete && c.Name() == "deleted_time" && fieldType == "int64":
+		fieldType = "field_type.DeletedTime"
 	case c.Name() == "deleted_at" && fieldType == "time.Time":
 		fieldType = "gorm.DeletedAt"
 	case coverable && c.needDefaultTag(c.defaultTagValue()):
@@ -74,7 +76,7 @@ func (c *Column) ToField(nullable, coverable, signable bool) *Field {
 		Type:             fieldType,
 		ColumnName:       c.Name(),
 		MultilineComment: c.multilineComment(),
-		GORMTag:          c.buildGormTag(),
+		GORMTag:          c.buildGormTag(softDelete),
 		Tag:              map[string]string{field.TagKeyJson: c.jsonTagNS(c.Name())},
 		ColumnComment:    comment,
 		ProtoTag:         map[string]string{field.TagKeyProtoForm: c.protoFormTagNS(c.Name()), field.TagKeyProtoJson: c.protoJsonTagNS(c.Name())},
@@ -86,7 +88,7 @@ func (c *Column) multilineComment() bool {
 	return ok && strings.Contains(cm, "\n")
 }
 
-func (c *Column) buildGormTag() field.GormTag {
+func (c *Column) buildGormTag(softDelete bool) field.GormTag {
 	tag := field.GormTag{
 		field.TagKeyGormColumn: []string{c.Name()},
 		field.TagKeyGormType:   []string{c.columnType()},
@@ -124,6 +126,9 @@ func (c *Column) buildGormTag() field.GormTag {
 			comment = strings.ReplaceAll(comment, "\n", "\\n")
 		}
 		tag.Set(field.TagKeyGormComment, comment)
+	}
+	if softDelete && c.Name() == "deleted_time" {
+		tag.Set(field.TagKeyGormSoftDelete, "milli")
 	}
 	return tag
 }

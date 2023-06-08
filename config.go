@@ -40,11 +40,12 @@ type Config struct {
 	ExcludeModels     []string
 
 	// generate model global configuration
-	FieldNullable     bool // generate pointer when field is nullable
-	FieldCoverable    bool // generate pointer when field has default value, to fix problem zero value cannot be assign: https://gorm.io/docs/create.html#Default-Values
-	FieldSignable     bool // detect integer field's unsigned type, adjust generated data type
-	FieldWithIndexTag bool // generate with gorm index tag
-	FieldWithTypeTag  bool // generate with gorm column type tag
+	FieldNullable       bool // generate pointer when field is nullable
+	FieldCoverable      bool // generate pointer when field has default value, to fix problem zero value cannot be assign: https://gorm.io/docs/create.html#Default-Values
+	FieldSignable       bool // detect integer field's unsigned type, adjust generated data type
+	FieldWithIndexTag   bool // generate with gorm index tag
+	FieldWithTypeTag    bool // generate with gorm column type tag
+	FieldWithSoftDelete bool // generate with gorm column type tag
 
 	Mode GenerateMode // generate mode
 

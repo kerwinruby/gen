@@ -21,6 +21,7 @@ const (
 	TagKeyGormIndex         = "index"
 	TagKeyGormDefault       = "default"
 	TagKeyGormComment       = "comment"
+	TagKeyGormSoftDelete    = "softDelete"
 )
 
 var (

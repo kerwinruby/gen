@@ -174,6 +174,7 @@ type Field struct {
 	CustomGenType    string
 	Relation         *field.Relation
 	ProtoTag         field.ProtoTag
+	SoftDeleteTime   bool
 }
 
 // Tags ...

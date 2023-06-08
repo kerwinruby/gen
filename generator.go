@@ -185,11 +185,12 @@ func (g *Generator) genModelConfig(tableName string, modelName string, modelOpts
 		FieldConfig: model.FieldConfig{
 			DataTypeMap: g.dataTypeMap,
 
-			FieldSignable:     g.FieldSignable,
-			FieldNullable:     g.FieldNullable,
-			FieldCoverable:    g.FieldCoverable,
-			FieldWithIndexTag: g.FieldWithIndexTag,
-			FieldWithTypeTag:  g.FieldWithTypeTag,
+			FieldSignable:       g.FieldSignable,
+			FieldNullable:       g.FieldNullable,
+			FieldCoverable:      g.FieldCoverable,
+			FieldWithIndexTag:   g.FieldWithIndexTag,
+			FieldWithTypeTag:    g.FieldWithTypeTag,
+			FieldWithSoftDelete: g.FieldWithSoftDelete,
 
 			FieldJSONTagNS: g.fieldJSONTagNS,
 		},
@@ -602,7 +603,7 @@ func (g *Generator) pushQueryStructMeta(meta *generate.QueryStructMeta) (*genInf
 }
 
 func render(tmpl string, wr io.Writer, data interface{}) error {
-	t, err := template.New(tmpl).Funcs(template.FuncMap{"Add": Add, "ExistsField": ExistsField}).Parse(tmpl)
+	t, err := template.New(tmpl).Funcs(template.FuncMap{"Add": Add, "ExistsField": ExistsField, "ToFieldType": ToFieldType}).Parse(tmpl)
 	if err != nil {
 		return err
 	}

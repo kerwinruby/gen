@@ -14,3 +14,10 @@ func ExistsField(fieldName string, fields []*model.Field) bool {
 	}
 	return false
 }
+
+func ToFieldType(_type string) string {
+	if _type == "field_type.DeletedTime" {
+		return "int64"
+	}
+	return _type
+}

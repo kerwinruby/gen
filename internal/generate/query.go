@@ -39,7 +39,8 @@ type QueryStructMeta struct {
 	ImportPkgPaths  []string
 	ModelMethods    []*parser.Method // user custom method bind to db base struct
 
-	interfaceMode bool
+	interfaceMode   bool
+	FieldSoftDelete bool
 }
 
 // parseStruct get all elements of struct with gorm's Parse, ignore unexported elements

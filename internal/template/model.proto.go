@@ -29,7 +29,7 @@ message {{.ModelStructName}} {
 {{.ColumnComment}}
     */
 	{{end -}}
-    {{.Type}} {{.Name}}` + " = {{$seq}} [{{.ProtoTags}}]; " +
+    {{ToFieldType .Type}} {{.Name}}` + " = {{$seq}} [{{.ProtoTags}}]; " +
 	"{{if not .MultilineComment}}{{if .ColumnComment}}// {{.ColumnComment}}{{end}}{{end}}" +
 	`{{end}}
 }
@@ -112,6 +112,7 @@ import (
 	xtime "gitlab.datahunter.cn/common/kratos/pkg/time"
 	bm "gitlab.datahunter.cn/common/kratos/pkg/net/http/blademaster"
 	"gitlab.datahunter.cn/common/kratos/pkg/net/metadata"
+	"gitlab.datahunter.cn/common/kratos/pkg/ecode"
 )
 
 //用于引入包
@@ -119,14 +120,17 @@ var (
 	_ bm.CORSConfig
 	_ xtime.Duration
 	_ metadata.MD
+	_ ecode.Code	
 )
 
 func (s *Service) {{.ModelStructName}}List(ctx context.Context, req *pb.{{.ModelStructName}}ListReq) (reply *pb.{{.ModelStructName}}ListRsp, err error) {
 	page := &Page{req.Page}
 	qdo := query.{{.ModelStructName}}.WithContext(ctx)
+	{{if not .FieldSoftDelete}}
 	{{if ExistsField "DeletedTime" .Fields}}
 	qdo = qdo.Where(query.{{.ModelStructName}}.DeletedTime.Eq(0))
-	{{end}}	
+	{{end}}
+	{{end}}
 	list, total, err := qdo.FindByPage(page.Offset(), page.Limit())
 	if err != nil {
 		return nil, err
@@ -167,31 +171,49 @@ func (s *Service) {{.ModelStructName}}Update(ctx context.Context, req *pb.{{.Mod
 }
 
 func (s *Service) {{.ModelStructName}}Del(ctx context.Context, req *pb.{{.ModelStructName}}DelReq) (reply *empty.Empty, err error) {
-	{{if ExistsField "DeletedTime" .Fields}}
-	columns := map[string]interface{}{
-		"deleted_time": xtime.Millisecond(),
+	if len(req.Id) != 1 {
+		return nil, ecode.RequestErr
 	}
 
-	if c, ok := ctx.(*bm.Context); ok {
-		if id, ok := c.Keys[metadata.UserID]; ok {
-			{{if ExistsField "DeletedID" .Fields}}
-			columns["deleted_id"] = id
-			{{end}}
-		}
-		if name, ok := c.Keys[metadata.UserName]; ok {
-			{{if ExistsField "DeletedName" .Fields}}
-			columns["deleted_name"] = name
-			{{end}}
-		}
+	find, err := query.{{.ModelStructName}}.WithContext(ctx).Where(query.{{.ModelStructName}}.ID.Eq(req.Id[0])).First()
+	if err != nil {
+		return nil, ecode.NothingFound
+	}
+
+	//gorm会劫持删除操作，转为软删除，即将给deleted_time字段赋值，
+	//如果需要物理删除可以使用如下方法
+	//if err = query.{{.ModelStructName}}.WithContext(ctx).Delete(find); err != nil {
+	//	return nil, err
+	//}		
+	if err = query.{{.ModelStructName}}.WithContext(ctx).Delete(find); err != nil {
+		return nil, err
 	}	
-	if _, err = query.{{.ModelStructName}}.WithContext(ctx).Where(query.{{.ModelStructName}}.ID.In(req.Id...)).UpdateColumns(columns); err != nil {
-		return nil, err
-	}
-	{{else}}
-	if _, err = query.{{.ModelStructName}}.Where(query.{{.ModelStructName}}.ID.In(req.Id...)).Delete(); err != nil {
-		return nil, err
-	}
-	{{end}}
+	
+//	{{if ExistsField "DeletedTime" .Fields}}
+//	columns := map[string]interface{}{
+//		"deleted_time": xtime.Millisecond(),
+//	}
+//
+//	if c, ok := ctx.(*bm.Context); ok {
+//		if id, ok := c.Keys[metadata.UserID]; ok {
+//			{{if ExistsField "DeletedID" .Fields}}
+//			columns["deleted_id"] = id
+//			{{end}}
+//		}
+//		if name, ok := c.Keys[metadata.UserName]; ok {
+//			{{if ExistsField "DeletedName" .Fields}}
+//			columns["deleted_name"] = name
+//			{{end}}
+//		}
+//	}	
+//	if _, err = query.{{.ModelStructName}}.WithContext(ctx).Where(query.{{.ModelStructName}}.ID.In(req.Id...)).UpdateColumns(columns); err != nil {
+//		return nil, err
+//	}
+//	{{else}}
+//	if _, err = query.{{.ModelStructName}}.Where(query.{{.ModelStructName}}.ID.In(req.Id...)).Delete(); err != nil {
+//		return nil, err
+//	}
+//	{{end}}
 	return &emptypb.Empty{}, nil
 }
 

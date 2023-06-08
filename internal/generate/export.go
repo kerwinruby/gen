@@ -48,6 +48,7 @@ func GetQueryStructMeta(db *gorm.DB, conf *model.Config) (*QueryStructMeta, erro
 		StructInfo:      parser.Param{Type: structName, Package: conf.ModelPkg},
 		ImportPkgPaths:  conf.ImportPkgPaths,
 		Fields:          getFields(db, conf, columns),
+		FieldSoftDelete: conf.FieldWithSoftDelete,
 	}).addMethodFromAddMethodOpt(conf.GetModelMethods()...), nil
 }
 
@@ -103,6 +104,7 @@ func GetQueryStructMetaFromObject(obj helper.Object, conf *model.Config) (*Query
 			Tag:              tag,
 			ColumnComment:    fl.Comment(),
 			MultilineComment: strings.Contains(fl.Comment(), "\n"),
+			SoftDeleteTime:   conf.FieldWithSoftDelete,
 		})
 	}
 
