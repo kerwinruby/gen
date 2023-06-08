@@ -182,7 +182,7 @@ func (s *Service) {{.ModelStructName}}Del(ctx context.Context, req *pb.{{.ModelS
 
 	//gorm会劫持删除操作，转为软删除，即将给deleted_time字段赋值，
 	//如果需要物理删除可以使用如下方法
-	//if err = query.{{.ModelStructName}}.WithContext(ctx).Delete(find); err != nil {
+	//if err = query.{{.ModelStructName}}.WithContext(ctx).Unscoped().Delete(find); err != nil {
 	//	return nil, err
 	//}		
 	if _, err = query.{{.ModelStructName}}.WithContext(ctx).Delete(find); err != nil {
