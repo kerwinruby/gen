@@ -185,7 +185,7 @@ func (s *Service) {{.ModelStructName}}Del(ctx context.Context, req *pb.{{.ModelS
 	//if err = query.{{.ModelStructName}}.WithContext(ctx).Delete(find); err != nil {
 	//	return nil, err
 	//}		
-	if err = query.{{.ModelStructName}}.WithContext(ctx).Delete(find); err != nil {
+	if _, err = query.{{.ModelStructName}}.WithContext(ctx).Delete(find); err != nil {
 		return nil, err
 	}	
 	
