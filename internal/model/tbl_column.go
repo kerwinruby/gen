@@ -54,7 +54,7 @@ func (c *Column) ToField(nullable, coverable, signable, softDelete bool) *Field 
 		fieldType = "u" + fieldType
 	}
 	switch {
-	case softDelete && c.Name() == "deleted_time" && fieldType == "int64":
+	case softDelete && c.Name() == "deleted_time" && (fieldType == "int64" || fieldType == "int"):
 		fieldType = "field_type.DeletedTime"
 	case c.Name() == "deleted_at" && fieldType == "time.Time":
 		fieldType = "gorm.DeletedAt"
